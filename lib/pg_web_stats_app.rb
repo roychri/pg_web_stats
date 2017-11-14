@@ -26,7 +26,7 @@ class PgWebStatsApp < Sinatra::Base
     order_by = if params[:order_by] && params[:direction]
       "#{params[:order_by]} #{params[:direction]}"
     else
-      "total_time desc"
+      "mean_time desc"
     end
 
     @stats = PG_WEB_STATS.get_stats(

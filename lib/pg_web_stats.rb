@@ -17,7 +17,7 @@ class PgWebStats
     )
   end
 
-  def get_stats(params = { order: "total_time desc" })
+  def get_stats(params = { order: "mean_time desc" })
     query = build_stats_query(params)
 
     results = []
