@@ -32,6 +32,8 @@ class PgWebStats
 
   def users
     @users ||= select_by_oid("select oid, rolname from pg_authid order by rolname;", 'rolname')
+  rescue PG::InsufficientPrivilege
+    @users ||= select_by_oid("select distinct usesysid oid, usename rolname from pg_user inner join pg_stat_statements on userid = usesysid where query NOT LIKE '%insufficient privilege%';", 'rolname')
   end
 
   def databases
