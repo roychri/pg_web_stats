@@ -37,7 +37,7 @@ class PgWebStats
   end
 
   def databases
-    @databases ||= select_by_oid("select oid, datname from pg_database order by datname;", 'datname')
+    @databases ||= select_by_oid("select pg_database.oid, datname from pg_database inner join pg_stat_statements on dbid=pg_database.oid AND query NOT LIKE '%insufficient privilege%' order by datname;", 'datname')
   end
 
   private
@@ -63,6 +63,8 @@ class PgWebStats
     userid = params[:userid]
     if userid && !userid.empty?
       where_conditions << "userid='#{userid.gsub("'", "''")}'"
+    else
+      where_conditions << "userid IN (#{users.keys.join(',')})"
     end
 
     dbid = params[:dbid]
