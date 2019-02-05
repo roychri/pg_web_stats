@@ -1,20 +1,22 @@
 <form method="GET" class="form-inline">
   Filter by db:
-  <select name="dbid">
+  <select name="dbid" style="width: 100px;">
     <option value=""></option>
     <% @databases.each do |item| %>
       <option value="<%= item[0] %>" <%= params[:dbid] == item[0] ? "selected" : "" %>><%= item[1] %></option>
     <% end %>
   </select>
   and by user:
-  <select name="userid">
+  <select name="userid" style="width: 100px;">
     <option value=""></option>
     <% @users.each do |item| %>
       <option value="<%= item[0] %>" <%= params[:userid] == item[0] ? "selected" : "" %>><%= item[1] %></option>
     <% end %>
   </select>
   query starts from:
-  <input type="text" name="q" value="<%= params[:query].to_s.gsub('"', '&quot;') %>"/>
+  <input type="text" name="q" value="<%= sanatize_str(params[:q]) %>" style="width: 100px;" />
+  Time: <input type="text" name="mintime" value="<%= params[:mintime] %>" size="4" style="width: 30px" />
+  Calls <input type="text" name="mincalls" value="<%= params[:mincalls] %>" size="4" style="width: 30px" />
 
   <input type="submit" name="submit" value="Filter" class="btn">
 </form>

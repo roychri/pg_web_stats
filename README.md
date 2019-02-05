@@ -3,7 +3,7 @@ pg_web_stats
 
 ![](http://f.cl.ly/items/1M2D402O0E0c0p2Y461E/Screen%20Shot%202013-06-29%20at%2012.30.22.png)
 
-Sexy sinatra app for [pg_stat_statements](http://www.postgresql.org/docs/9.2/static/pgstatstatements.html). [![Code Climate](https://codeclimate.com/github/kirs/pg_web_stats.png)](https://codeclimate.com/github/kirs/pg_web_stats)
+Mountable Sinatra app to render [pg_stat_statements](http://www.postgresql.org/docs/9.2/static/pgstatstatements.html) in user friendly way. [![Code Climate](https://codeclimate.com/github/kirs/pg_web_stats.png)](https://codeclimate.com/github/kirs/pg_web_stats)
 
 <a href="https://evilmartians.com/">
 <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Sponsored by Evil Martians" width="236" height="54"></a>
@@ -18,10 +18,18 @@ Sexy sinatra app for [pg_stat_statements](http://www.postgresql.org/docs/9.2/sta
 
 0. Prepare your PG setup: enable the `pg_stat_statements` extension and execute `CREATE EXTENSION pg_stat_statements` inside the database you want to inspect. *Hint: there is an [awesome article about pg_stat_statements in russian](http://evtuhovich.ru/blog/2013/06/28/pg-stat-statements/#comment-945382408).*
 1. Clone the repo
-2. Fill `config.yml.example` with your credentians and save it as `config.yml`
+2. Set the environment variables for your connection to the DB
 3. Start the app: `rake server` (or run `rake console` to have command line)
 4. ???
 5. PROFIT
+
+## Environment Variables
+
+* POSTGRES_DB_NAME
+* POSTGRES_DB_HOST
+* POSTGRES_DB_USER (postgres is usually the default)
+* POSTGRES_DB_PASSWORD
+* POSTGRES_DB_PORT  (Usually 5432)
 
 ## Mount inside a rails app
 
@@ -40,9 +48,8 @@ And then execute:
 Create file config/initializers/pg_web_stats.rb
 
 ```ruby
-# Configure database connection
-config_hash = YAML.load_file(Rails.root.join('config', 'database.yml'))[Rails.env]
-PG_WEB_STATS = PgWebStats.new(config_hash)
+# Remember to Configure database connection by setting environment variables.
+PG_WEB_STATS = PgWebStats.new
 
 # Restrict access to pg_web_stats with Basic Authentication
 # (or use any other authentication system).

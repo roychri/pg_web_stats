@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'pg_web_stats_app'
 
-PG_WEB_STATS = PgWebStats.new(File.expand_path(File.join(File.dirname(__FILE__), 'config.yml')))
+PG_WEB_STATS = PgWebStats.new
 
 def app
   PgWebStatsApp

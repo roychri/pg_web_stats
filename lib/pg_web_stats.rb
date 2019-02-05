@@ -3,17 +3,15 @@ require 'coderay'
 require 'yaml'
 
 class PgWebStats
-  attr_accessor :config, :connection
+  attr_accessor :connection
 
-  def initialize(config_path = 'config.yml')
-    hash = config_path.is_a?(Hash) ? config_path : YAML.load_file(config_path)
-    self.config = Hash[hash.map{ |k, v| [k.to_s, v] }]
+  def initialize()
     self.connection = PG.connect(
-      dbname: config['database'],
-      host: config['host'],
-      user: config['user'] || config['username'],
-      password: config['password'],
-      port: config['port']
+      dbname: ENV["POSTGRES_DB_NAME"],
+      host: ENV["POSTGRES_DB_HOST"],
+      user: ENV["POSTGRES_DB_USER"],
+      password: ENV["POSTGRES_DB_PASSWORD"],
+      port: ENV["POSTGRES_DB_PORT"]
     )
   end
 
@@ -75,6 +73,14 @@ class PgWebStats
     q = params[:q]
     if q && !q.empty?
       where_conditions << "query LIKE '#{q.gsub("'", "''")}%'"
+    end
+
+    if params[:mincalls]
+      where_conditions << "calls > #{params[:mincalls]}"
+    end
+
+    if params[:mintime]
+      where_conditions << "mean_time > #{params[:mintime]}"
     end
 
     query += " WHERE #{where_conditions.join(" AND ")}" if where_conditions.size > 0
