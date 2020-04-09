@@ -30,8 +30,14 @@ class PgWebStats
   end
 
   def get_stats(params = { order: "mean_time desc" })
-    query = build_stats_query(params)
+    query = build_stats_query_base("COUNT(*) AS count", params)
 
+    count = 0
+    exec_query(query) do |result|
+      count = result[0]["count"].to_i
+    end
+
+    query = build_stats_query("*", params)
     results = []
     exec_query(query) do |result|
       result.each do |row|
@@ -39,7 +45,7 @@ class PgWebStats
       end
     end
 
-    results
+     {total: count, items: results}
   end
 
   def users
@@ -65,10 +71,8 @@ class PgWebStats
     @selection
   end
 
-  def build_stats_query(params)
-    order_by = params[:order]
-
-    query = "SELECT * FROM pg_stat_statements"
+  def build_stats_query_base(what, params)
+    query = "SELECT #{what} FROM pg_stat_statements"
 
     where_conditions = []
 
@@ -99,7 +103,27 @@ class PgWebStats
 
     query += " WHERE #{where_conditions.join(" AND ")}" if where_conditions.size > 0
 
+    query
+  end
+
+  def build_stats_query(what, params)
+    order_by = params[:order]
+
+    query = build_stats_query_base("*", params)
+
+    order_by = if params[:order_by] && params[:direction]
+                 "#{params[:order_by]} #{params[:direction]}"
+               else
+                 "total_time desc"
+               end
     query += " ORDER BY #{order_by}"
+
+    count = params[:count] ? params[:count].clamp(1, 1000) : 25
+    query += " LIMIT #{count}"
+
+    if ( params[:offset] || 0 ) > 0
+      query += " OFFSET #{params[:offset]}"
+    end
 
     query
   end
