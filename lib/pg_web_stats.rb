@@ -6,6 +6,10 @@ class PgWebStats
   attr_accessor :connection
 
   def initialize()
+    self.connect()
+  end
+
+  def connect()
     self.connection = PG.connect(
       dbname: ENV["POSTGRES_DB_NAME"],
       host: ENV["POSTGRES_DB_HOST"],
@@ -15,11 +19,21 @@ class PgWebStats
     )
   end
 
+  def exec_query( query )
+    begin
+      return connection.exec( query ) do | results |
+        yield results
+      end
+    rescue PG::UnableToSend
+      connect()
+    end
+  end
+
   def get_stats(params = { order: "mean_time desc" })
     query = build_stats_query(params)
 
     results = []
-    connection.exec(query) do |result|
+    exec_query(query) do |result|
       result.each do |row|
         results << Row.new(row, users, databases)
       end
@@ -42,7 +56,7 @@ class PgWebStats
 
   def select_by_oid(select_query, row_name)
     @selection = {}
-    connection.exec(select_query) do |result|
+    exec_query(select_query) do |result|
       result.each do |row|
         @selection[row['oid']] = row[row_name]
       end
